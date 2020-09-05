@@ -1,0 +1,9 @@
+{
+    "app": "Simple Server",
+    "name": "Site B",
+    "port": 8001,
+    "db": {
+        "username": "user_b",
+        "password": "thI%^0rZi@"
+    }
+}
