@@ -1,9 +1,0 @@
-{
-    "app": "Simple Server",
-    "name": "Site A",
-    "port": 8000,
-    "db": {
-        "username": "user_a",
-        "password": "ajivx_vm@$JAIX"
-    }
-}

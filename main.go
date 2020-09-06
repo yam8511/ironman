@@ -1,53 +1,47 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 )
 
 func main() {
-	configFile := os.Getenv("CONF_FILE")
-	f, err := ioutil.ReadFile("config/" + configFile + ".json")
-	if err != nil {
-		panic(err)
+	/// 編譯程式: go build -o program .
+	/// 執行指令: APP=ironman ./program 1 2 3
+
+	// cmd・第一式：取所有環境變數
+	fmt.Println("all environments: ", os.Environ())
+	// Output: all environments: [APP=ironman GOROOT=/usr/local/go SHELL=/bin/zsh ......忽略]
+
+	// cmd・第二式：取指定的環境變數
+	appInEnv := os.Getenv("APP")
+	fmt.Println("APP in environments: ", appInEnv)
+	// Output: APP in environments: ironman
+
+	// cmd・第三式：取指令參數
+	fmt.Println("all args: ", os.Args)
+	// Output: all args:  [./program 1 2 3]
+
+	if len(os.Args) < 2 { // 判斷參數除了執行指令本身，有沒有額外參數
+		// 如果沒有額外參數，正常結束並提示指令
+		fmt.Println("請輸入其中之一的參數： demo, server")
+		os.Exit(0)
 	}
-	fmt.Println(string(f))
 
-	var configData struct {
-		App  string `json:"app"`
-		Name string `json:"Name"`
-		Port int    `json:"port"`
-		DB   struct {
-			Username string `json:"username"`
-			Password string `json:"password"`
-		} `json:"db"`
+	// 定義每個指令，要執行的動作
+	switch os.Args[1] {
+	case "demo":
+		fmt.Println("這是一個示範指令")
+
+	case "server":
+		port := ":" + os.Getenv("PORT")
+		log.Println("開始建立伺服器 ", port)
+		log.Fatal(http.ListenAndServe(port, nil))
+
+	default:
+		fmt.Println("請輸入其中之一的參數： demo, server")
+		os.Exit(1)
 	}
-
-	err = json.Unmarshal(f, &configData)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Project Name", configData.Name)
-
-	router := http.NewServeMux()
-	router.HandleFunc("/api-demo", func(w http.ResponseWriter, r *http.Request) {
-		// 使用配置檔．第一式：在API加上
-		w.Write([]byte("目前專案名稱是" + configData.Name))
-	})
-
-	// 使用配置檔．第二式：決定伺服器的Port
-	addr := fmt.Sprintf(":%d", configData.Port)
-	log.Println("開始建立伺服器 ", addr)
-	log.Fatal(http.ListenAndServe(addr, router))
-
-	// 使用配置檔．第三式：決定DB連線的帳密或IP
-	_ = fmt.Sprintf("connect database: username=%s password=%s",
-		configData.DB.Username,
-		configData.DB.Password,
-	)
 }
